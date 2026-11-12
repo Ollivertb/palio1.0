@@ -47,16 +47,17 @@
 .ficha__fields { display: flex; flex-direction: column; gap: 16px; }
 
 /* Backup Page */
-.backup__warning { margin-bottom: 16px; }
+.backup__warning, .backup-warning { margin-bottom: 16px; }
 
-.backup__actions { display: flex; flex-direction: column; gap: 8px; }
+.backup-actions { display: flex; flex-direction: column; gap: 8px; }
+.backup-actions .btn { width: 100%; }
 
 /* Intervals Page */
 .intervals__fields { display: flex; flex-direction: column; gap: 16px; }
 
-.interval__field { display: flex; flex-direction: column; gap: 8px; }
+.interval-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 
-.interval__field > b { margin-bottom: 4px; }
+.interval-field > b { margin-bottom: 4px; }
 
 /* Sync Page */
 .sync__info { margin-bottom: 24px; }

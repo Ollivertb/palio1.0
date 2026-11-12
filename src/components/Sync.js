@@ -22,9 +22,13 @@ export function renderSync(state, { navigate }) {
     return renderSyncSetup();
   }
 
-  // Subscribe to status changes
+  // Subscribe to status changes and re-render only while on this page.
   if (!statusUnsubscribe) {
-    statusUnsubscribe = onSyncStatusChange(() => renderSync(state, { navigate }));
+    statusUnsubscribe = onSyncStatusChange(() => {
+      import('../app.js').then(({ getCurrentRoute, navigate }) => {
+        if (getCurrentRoute() === 'sync') navigate('sync', { keepScroll: true });
+      });
+    });
   }
 
   return `
@@ -199,3 +203,10 @@ function getStatusText(status, error) {
     default: return 'Desconhecido';
   }
 }
+
+/* ==========================================================================
+   Global handlers used by inline template attributes
+   ========================================================================== */
+window.connectGitHub = connectGitHub;
+window.disconnectGitHub = disconnectGitHub;
+window.manualSync = manualSync;

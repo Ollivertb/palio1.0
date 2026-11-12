@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { getIcon } from '../utils/icons.js';
-import { escapeHtml, formatCurrency, formatNumber, dt, nf } from '../utils/helpers.js';
+import { escapeHtml, formatCurrency, formatNumber, dt, nf, mo } from '../utils/helpers.js';
 import { getCurrentKm, getAverageConsumption, getMonthlyExpensesTotal, getUpcomingServices, getTotalExpenses, getAllReminders, getAllDocuments, getAllMaintenance, getAllFuel, getState } from '../store.js';
 import { getMonthAbbr } from '../utils/date.js';
 
@@ -305,7 +305,7 @@ function renderExpensesChart() {
         const monthAbbr = getMonthAbbr(d.month);
         return `
           <rect x="${x}" y="${chartBottom - Math.max(h, 2)}" width="32" height="${Math.max(h, 2)}" rx="5"
-                fill="${isCurrent ? 'var(--color-accent)' : 'var(--color-mutation)'}"
+                fill="${isCurrent ? 'var(--color-accent)' : 'var(--color-muted)'}"
                 opacity="${isCurrent ? 1 : 0.35}">
             <title>${monthAbbr}: ${formatCurrency(d.total)}</title>
           </rect>

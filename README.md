@@ -35,12 +35,23 @@ npm run preview
 
 ## 📦 Deploy no GitHub Pages
 
+O deploy é automático via **GitHub Actions** (`.github/workflows/deploy.yml`): todo push na `main` compila o app e publica a pasta `dist`.
+
+**Configuração necessária (uma vez só):**
+
+1. Vá em **Settings → Pages** no repositório.
+2. Em **Build and deployment → Source**, escolha **GitHub Actions**.
+3. Faça push na `main` (ou rode o workflow manualmente em **Actions → Deploy to GitHub Pages → Run workflow**).
+
+O app fica disponível em `https://<usuario>.github.io/palio1.0/`. O workflow já define `VITE_BASE=/palio1.0/` para os caminhos funcionarem nesse subdiretório.
+
+**Alternativa manual (branch `gh-pages`):**
+
 ```bash
-# Build e deploy automático
 npm run deploy
 ```
 
-Configure o repositório para usar GitHub Pages na branch `gh-pages` (criada automaticamente pelo `gh-pages`).
+Depois selecione a branch `gh-pages` em **Settings → Pages**.
 
 ## 🔧 Configuração da Sincronização (GitHub)
 

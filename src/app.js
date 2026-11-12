@@ -2,10 +2,9 @@
    Application Controller
    ========================================================================== */
 
-import { getState, subscribe, resetAllData } from './store.js';
-import { getIcon } from './utils/icons.js';
+import { getState, subscribe } from './store.js';
 import { showToast } from './utils/helpers.js';
-import { pullFromGitHub, onSyncStatusChange, getSyncInfo, isSyncConfigured } from './utils/github-sync.js';
+import { pullFromGitHub, onSyncStatusChange, isSyncConfigured } from './utils/github-sync.js';
 
 // Pages
 import { renderHome } from './components/Home.js';
@@ -21,24 +20,25 @@ import { renderIntervals } from './components/Intervals.js';
 import { renderHeader } from './components/Header.js';
 import { renderNav } from './components/Nav.js';
 import { renderFab } from './components/Fab.js';
-import { renderChatBar } from './components/ChatBar.js';
+import { renderChatBar, setupChatBar } from './components/ChatBar.js';
 import { Modal } from './components/Modal.js';
-import { FormModal } from './components/FormModal.js';
+import { FormModal, openFormModal } from './components/FormModal.js';
+import { sendChatMessage } from './components/Chat.js';
 
 let currentRoute = 'home';
 let searchQuery = '';
 let modal = null;
 let formModal = null;
 
-// Route to page renderers
+// Route to page renderers. Every renderer receives (state, ctx).
 const pageRenderers = {
   home: renderHome,
   chat: renderChat,
-  manut: () => renderList('manut'),
-  abast: () => renderList('abast'),
-  lemb: () => renderList('lemb'),
-  doc: () => renderList('doc'),
-  nota: () => renderList('nota'),
+  manut: (state, ctx) => renderList('manut', state, ctx),
+  abast: (state, ctx) => renderList('abast', state, ctx),
+  lemb: (state, ctx) => renderList('lemb', state, ctx),
+  doc: (state, ctx) => renderList('doc', state, ctx),
+  nota: (state, ctx) => renderList('nota', state, ctx),
   mais: renderMais,
   ficha: renderFicha,
   backup: renderBackup,
@@ -46,22 +46,18 @@ const pageRenderers = {
   interv: renderIntervals
 };
 
-// Navigation tabs
-const TABS = [
-  { id: 'home', icon: 'home', label: 'Início' },
-  { id: 'chat', icon: 'chat', label: 'Assistente' },
-  { id: 'manut', icon: 'manut', label: 'Manutenção' },
-  { id: 'abast', icon: 'abast', label: 'Abastecer' },
-  { id: 'mais', icon: 'mais', label: 'Mais' }
-];
-
 /**
  * Initialize the application
  */
 export async function initApp() {
   // Initialize modals
-  modal = new Modal(document.getElementById('modal-root'));
-  formModal = new FormModal(document.getElementById('form-modal-root'));
+  const modalRoot = document.getElementById('modal-root');
+  const formModalRoot = document.getElementById('form-modal-root');
+  modal = new Modal(modalRoot);
+  formModal = new FormModal(formModalRoot);
+
+  // Expose the form modal instance for inline handlers (FAB, cards, etc.)
+  window.garagemApp.formModal = formModal;
 
   // Initial render
   render();
@@ -69,8 +65,8 @@ export async function initApp() {
   // Subscribe to state changes
   subscribe(render);
 
-  // Subscribe to sync status
-  onSyncStatusChange(renderHeader);
+  // Subscribe to sync status (re-render header only)
+  onSyncStatusChange(() => renderHeader(getState()));
 
   // Initial sync if configured
   if (isSyncConfigured()) {
@@ -108,11 +104,19 @@ export function getCurrentRoute() {
 }
 
 /**
- * Set search query
+ * Set search query (re-renders only the list container)
  */
 export function setSearchQuery(query) {
   searchQuery = query;
   render();
+  // Restore focus to the search box after re-render
+  const input = document.querySelector('.search-input');
+  if (input) {
+    input.focus();
+    const val = input.value;
+    input.value = '';
+    input.value = val;
+  }
 }
 
 /**
@@ -128,28 +132,30 @@ export function getSearchQuery() {
 function render() {
   const state = getState();
 
-  // Render header
   renderHeader(state);
 
-  // Render main content
   const mainEl = document.getElementById('main-content');
   const renderer = pageRenderers[currentRoute] || renderHome;
   mainEl.innerHTML = renderer(state, { searchQuery, navigate, modal, formModal });
-  mainEl.classList.add('page');
 
-  // Render nav
   renderNav(currentRoute);
 
-  // Render FAB
+  // FAB
   const fabContainer = document.getElementById('fab-container');
   const showFab = ['manut', 'abast', 'lemb', 'doc', 'nota'].includes(currentRoute);
   fabContainer.innerHTML = showFab ? renderFab(currentRoute) : '';
 
-  // Render chat bar
+  // Chat bar
   const chatBarContainer = document.getElementById('chat-bar-container');
-  chatBarContainer.innerHTML = currentRoute === 'chat' ? renderChatBar() : '';
+  if (currentRoute === 'chat') {
+    chatBarContainer.innerHTML = renderChatBar();
+    setupChatBar(sendChatMessage);
+    // Keep the conversation scrolled to the bottom
+    window.scrollTo(0, document.body.scrollHeight);
+  } else {
+    chatBarContainer.innerHTML = '';
+  }
 
-  // Update theme
   updateTheme();
 }
 
@@ -157,13 +163,10 @@ function render() {
  * Handle keyboard shortcuts
  */
 function handleKeydown(e) {
-  // Escape closes modals
   if (e.key === 'Escape') {
     if (modal?.isOpen) modal.close();
     if (formModal?.isOpen) formModal.close();
   }
-
-  // Cmd/Ctrl + K for search
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault();
     const searchInput = document.querySelector('input[placeholder*="Buscar"]');
@@ -176,12 +179,8 @@ function handleKeydown(e) {
  */
 function updateTheme() {
   const root = document.documentElement;
-  const saved = root.dataset.theme;
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  if (saved) {
-    root.dataset.theme = saved;
-  } else {
+  if (!root.dataset.theme) {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     root.dataset.theme = prefersDark ? 'dark' : 'light';
   }
 }
@@ -191,6 +190,7 @@ function updateTheme() {
  */
 export function toggleTheme() {
   const root = document.documentElement;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const current = root.dataset.theme || (prefersDark ? 'dark' : 'light');
   root.dataset.theme = current === 'dark' ? 'light' : 'dark';
   renderHeader(getState());
@@ -203,12 +203,12 @@ export function renameCar() {
   const state = getState();
   formModal.open({
     title: 'Nome do carro',
+    category: 'wheel',
     fields: [
-      { name: 'nome', label: 'Como você chama o carro', type: 'text', value: state.nome, required: true }
+      { name: 'nome', label: 'Como você chama o carro', type: 'text', value: state.nome, required: true, placeholder: 'Ex.: Meu Palio' }
     ],
     onSubmit: (data) => {
       import('./store.js').then(m => m.setCarName(data.nome));
-      showToast('Nome alterado');
     }
   });
 }
@@ -218,15 +218,14 @@ export function renameCar() {
  */
 export function setKm() {
   const state = getState();
-  const currentKm = state.km;
   formModal.open({
     title: 'Quilometragem atual',
+    category: 'wheel',
     fields: [
-      { name: 'km', label: 'Km rodados', type: 'number', value: currentKm, required: true, placeholder: 'Ex.: 86.200' }
+      { name: 'km', label: 'Km rodados', type: 'number', value: state.km, required: true, placeholder: 'Ex.: 86.200', hint: 'Se houver um registro com km maior, ele prevalece.' }
     ],
     onSubmit: (data) => {
       import('./store.js').then(m => m.setCurrentKm(data.km));
-      showToast('Quilometragem atualizada');
     }
   });
 }
@@ -236,33 +235,40 @@ export function setKm() {
  */
 export function setMeta() {
   const state = getState();
-  const meta = state.meta;
   formModal.open({
     title: 'Meta de consumo',
+    category: 'abast',
     fields: [
-      { name: 'meta', label: 'Km por litro desejado', type: 'decimal', value: meta || '', placeholder: 'Ex.: 11,5', hint: 'Deixe vazio para remover a meta' }
+      { name: 'meta', label: 'Km por litro desejado', type: 'decimal', value: state.meta || '', placeholder: 'Ex.: 11,5', hint: 'Deixe vazio para remover a meta.' }
     ],
     onSubmit: (data) => {
       import('./store.js').then(m => m.setMeta(data.meta));
-      showToast(data.meta ? 'Meta salva' : 'Meta removida');
     }
   });
 }
 
 /**
- * Show toast notification
+ * Clear the assistant conversation (with confirmation)
  */
-export { showToast };
+export function clearConversation() {
+  if (confirm('Limpar a conversa? Os registros salvos continuam.')) {
+    import('./store.js').then(m => m.clearChat());
+  }
+}
 
-/**
- * Export for global access (used in inline handlers)
- */
-window.garagemApp = {
+/* ==========================================================================
+   Global API used by inline handlers in templates
+   ========================================================================== */
+window.garagemApp = Object.assign(window.garagemApp || {}, {
   navigate,
   setSearchQuery,
   toggleTheme,
   renameCar,
   setKm,
   setMeta,
-  showToast
-};
+  showToast,
+  openFormModal,
+  clearChat: clearConversation
+});
+
+export { showToast };

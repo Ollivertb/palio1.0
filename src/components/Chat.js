@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { getIcon } from '../utils/icons.js';
-import { escapeHtml, formatCurrency, formatNumber, dt, nf, mo, getToday } from '../utils/helpers.js';
+import { escapeHtml, formatCurrency, formatNumber, dt, nf, mo, getToday, parseNumberInput, parseDecimalInput } from '../utils/helpers.js';
 import { getState, addChatMessage, updateChatAction, clearChat, getAllMaintenance, getAllFuel, getAllReminders, getAllDocuments, getCurrentKm } from '../store.js';
 import { formatMaintenanceType, formatFuelType, formatDocType, calculateAverageConsumption } from '../utils/format.js';
 import { parseRelativeDate } from '../utils/date.js';
@@ -61,7 +61,7 @@ async function initDictation() {
 /**
  * Render chat page
  */
-export function renderChat(state, { navigate }) {
+export function renderChat(state, ctx = {}) {
   const chat = state.chat || [];
   const hasAI = !!aiModel;
 

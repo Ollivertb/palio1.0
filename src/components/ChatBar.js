@@ -5,14 +5,18 @@
 import { getIcon } from '../utils/icons.js';
 
 let dictation = null;
+let isDictating = false;
+let finalTranscript = '';
+let sendHandler = null;
 
 /**
  * Initialize dictation (Web Speech API)
  */
 async function initDictation() {
-  if (!dictation && 'webkitSpeechRecognition' in window) {
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    dictation = new SpeechRecognition();
+  if (!dictation) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    dictation = new SR();
     dictation.lang = 'pt-BR';
     dictation.continuous = true;
     dictation.interimResults = true;
@@ -27,7 +31,7 @@ export function renderChatBar() {
   return `
     <div class="chat-bar" id="chat-bar">
       <div class="chat-bar__inner">
-        <button class="chat-bar__btn chat-bar__btn--mute" id="dictate-btn" onclick="toggleDictation()" aria-label="Ditar" title="Ditar">
+        <button class="chat-bar__btn chat-bar__btn--mute" id="dictate-btn" type="button" aria-label="Ditar" title="Ditar">
           ${getIcon('mic')}
         </button>
         <textarea
@@ -37,7 +41,7 @@ export function renderChatBar() {
           placeholder="Ex.: troquei a correia dentada com 85.000 km"
           aria-label="Mensagem"
         ></textarea>
-        <button class="chat-bar__btn" onclick="sendChatMessage()" aria-label="Enviar">
+        <button class="chat-bar__btn" id="send-btn" type="button" aria-label="Enviar">
           ${getIcon('send')}
         </button>
       </div>
@@ -46,40 +50,9 @@ export function renderChatBar() {
 }
 
 /**
- * Setup chat bar event listeners
+ * Read the bar input and hand the text to the send handler.
  */
-export function setupChatBar(onSend, onDictation) {
-  const input = document.getElementById('chat-input');
-  const dictateBtn = document.getElementById('dictate-btn');
-
-  if (input) {
-    // Auto-resize textarea
-    input.addEventListener('input', () => {
-      input.style.height = 'auto';
-      input.style.height = Math.min(input.scrollHeight, 110) + 'px';
-    });
-
-    // Send on Enter (not Shift+Enter)
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendChatMessage(onSend);
-      }
-    });
-
-    // Focus on mount
-    setTimeout(() => input.focus(), 100);
-  }
-
-  if (dictateBtn) {
-    dictateBtn.onclick = () => toggleDictation(onDictation);
-  }
-}
-
-/**
- * Send chat message
- */
-function sendChatMessage(onSend) {
+export function sendChatFromBar() {
   const input = document.getElementById('chat-input');
   if (!input) return;
 
@@ -89,21 +62,48 @@ function sendChatMessage(onSend) {
   input.value = '';
   input.style.height = 'auto';
 
-  if (onSend) onSend(text);
+  if (sendHandler) sendHandler(text);
+}
+
+/**
+ * Setup chat bar event listeners
+ */
+export function setupChatBar(onSend) {
+  sendHandler = onSend;
+
+  const input = document.getElementById('chat-input');
+  const dictateBtn = document.getElementById('dictate-btn');
+  const sendBtn = document.getElementById('send-btn');
+
+  if (input) {
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 110) + 'px';
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatFromBar();
+      }
+    });
+
+    setTimeout(() => input.focus(), 100);
+  }
+
+  if (sendBtn) sendBtn.addEventListener('click', sendChatFromBar);
+  if (dictateBtn) dictateBtn.addEventListener('click', toggleDictation);
 }
 
 /**
  * Toggle voice dictation
  */
-let isDictating = false;
-let finalTranscript = '';
-
-async function toggleDictation(onResult) {
+export async function toggleDictation() {
   const dictateBtn = document.getElementById('dictate-btn');
   const input = document.getElementById('chat-input');
+  if (!dictateBtn) return;
 
   if (isDictating) {
-    // Stop dictation
     if (dictation) dictation.stop();
     isDictating = false;
     dictateBtn.classList.remove('dictating');
@@ -111,10 +111,9 @@ async function toggleDictation(onResult) {
     return;
   }
 
-  // Start dictation
   dictation = await initDictation();
   if (!dictation) {
-    alert('Ditado por voz não suportado neste navegador.');
+    window.garagemApp?.showToast?.('Ditado por voz não suportado neste navegador.', true);
     return;
   }
 
@@ -140,25 +139,29 @@ async function toggleDictation(onResult) {
     }
   };
 
-  dictation.onend = () => {
+  const stopUI = () => {
     isDictating = false;
     dictateBtn.classList.remove('dictating');
     dictateBtn.innerHTML = getIcon('mic');
   };
 
+  dictation.onend = stopUI;
   dictation.onerror = (event) => {
     console.error('Dictation error:', event.error);
-    isDictating = false;
-    dictateBtn.classList.remove('dictating');
-    dictateBtn.innerHTML = getIcon('mic');
+    stopUI();
   };
 
   try {
     dictation.start();
   } catch (e) {
     console.error('Failed to start dictation:', e);
-    isDictating = false;
-    dictateBtn.classList.remove('dictating');
-    dictateBtn.innerHTML = getIcon('mic');
+    stopUI();
   }
 }
+
+/* ==========================================================================
+   Global handlers used by inline template attributes
+   ========================================================================== */
+window.garagemApp = window.garagemApp || {};
+window.garagemApp.toggleDictation = toggleDictation;
+window.garagemApp.sendChatFromBar = sendChatFromBar;

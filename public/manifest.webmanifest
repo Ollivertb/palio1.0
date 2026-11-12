@@ -2,7 +2,8 @@
   "name": "Garagem do Palio",
   "short_name": "Garagem",
   "description": "Gerencie manutenções, abastecimentos e documentos do seu Fiat Palio",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#eceef0",
   "theme_color": "#111214",
@@ -21,14 +22,14 @@
       "name": "Nova Manutenção",
       "short_name": "Manutenção",
       "description": "Registrar uma nova manutenção",
-      "url": "/?action=manut",
+      "url": "./?action=manut",
       "icons": [{ "src": "icon.svg", "sizes": "any" }]
     },
     {
       "name": "Novo Abastecimento",
       "short_name": "Abastecer",
       "description": "Registrar um novo abastecimento",
-      "url": "/?action=abast",
+      "url": "./?action=abast",
       "icons": [{ "src": "icon.svg", "sizes": "any" }]
     }
   ]

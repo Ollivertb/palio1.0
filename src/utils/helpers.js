@@ -8,10 +8,10 @@
 export function escapeHtml(str) {
   if (str == null) return '';
   return String(str).replace(/[&<>"]/g, c => ({
-    '&': '&',
-    '<': '<',
-    '>': '>',
-    '"': '"'
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;'
   }[c]));
 }
 
@@ -131,21 +131,46 @@ export function throttle(fn, limit) {
  * Format number input with thousand separators
  */
 export function formatNumberInput(value) {
-  return value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  if (value == null || value === '') return '';
+  return String(value).replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 /**
  * Parse number from formatted string
  */
 export function parseNumberInput(value) {
-  return Number(value.replace(/\D/g, '')) || 0;
+  if (typeof value === 'number') return Math.round(value) || 0;
+  return Number(String(value).replace(/\D/g, '')) || 0;
 }
 
 /**
- * Parse decimal from formatted string (handles comma)
+ * Parse decimal from formatted string (handles comma or dot decimals)
  */
 export function parseDecimalInput(value) {
-  return Number(value.replace(/\./g, '').replace(',', '.')) || 0;
+  if (typeof value === 'number') return isFinite(value) ? value : 0;
+
+  let s = String(value).trim().replace(/[^\d.,-]/g, '');
+  if (!s) return 0;
+
+  if (s.includes(',') && s.includes('.')) {
+    // "1.234,56" -> dots are thousands, comma is decimal
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.includes(',')) {
+    s = s.replace(',', '.');
+  } else if (s.includes('.')) {
+    const parts = s.split('.');
+    if (parts.length > 2) {
+      // "1.234.567" -> thousands
+      s = parts.join('');
+    } else if (parts[1].length === 3 && parts[0].length > 0) {
+      // "1.500" -> thousands
+      s = parts.join('');
+    }
+    // otherwise keep as decimal ("11.5", "150.50")
+  }
+
+  const n = Number(s);
+  return isFinite(n) ? n : 0;
 }
 
 /**

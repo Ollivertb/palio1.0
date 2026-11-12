@@ -30,7 +30,9 @@ export function validateRequired(value, fieldName) {
  * Validate number field
  */
 export function validateNumber(value, fieldName, { min, max, integer = false } = {}) {
-  const num = integer ? parseNumberInput(value) : parseDecimalInput(value);
+  const num = typeof value === 'number'
+    ? value
+    : (integer ? parseNumberInput(value) : parseDecimalInput(value));
   if (isNaN(num)) {
     throw new ValidationError(`${fieldName} deve ser um número válido`, fieldName);
   }

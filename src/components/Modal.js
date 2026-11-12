@@ -12,6 +12,8 @@ export class Modal {
     this.container = container;
     this.isOpen = false;
     this.onCloseCallbacks = [];
+    // Backdrop inline handler resolves through this reference.
+    if (container) container.modalInstance = this;
   }
 
   /**
@@ -80,24 +82,37 @@ export class Modal {
 export function confirmModal(options) {
   return new Promise((resolve) => {
     const modal = new Modal(document.getElementById('modal-root'));
+    let settled = false;
+
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      modal.close();
+      resolve(result);
+    };
+
     modal.open(`
       <div class="modal-handle"></div>
       <h2 id="modal-title">${options.title}</h2>
       <p class="text-muted" style="margin: 8px 0 24px;">${options.message}</p>
       <div class="form-actions">
-        <button class="btn btn--secondary" onclick="this.closest('.modal-sheet').modalInstance.close(); resolve(false)">Cancelar</button>
-        <button class="btn btn--${options.danger ? 'danger' : 'primary'}" onclick="this.closest('.modal-sheet').modalInstance.close(); resolve(true)">
+        <button type="button" class="btn btn--secondary" data-confirm-cancel>Cancelar</button>
+        <button type="button" class="btn btn--${options.danger ? 'danger' : 'primary'}" data-confirm-ok>
           ${options.confirmText || 'Confirmar'}
         </button>
       </div>
     `);
 
-    // Override close to resolve promise
-    const originalClose = modal.close.bind(modal);
-    modal.close = () => {
-      originalClose();
-      resolve(false);
-    };
+    modal.container.querySelector('[data-confirm-cancel]').addEventListener('click', () => finish(false));
+    modal.container.querySelector('[data-confirm-ok]').addEventListener('click', () => finish(true));
+
+    // Closing by backdrop/Escape counts as cancelling.
+    modal.onClose(() => {
+      if (!settled) {
+        settled = true;
+        resolve(false);
+      }
+    });
   });
 }
 
@@ -107,15 +122,30 @@ export function confirmModal(options) {
 export function alertModal(message, title = 'Aviso') {
   return new Promise((resolve) => {
     const modal = new Modal(document.getElementById('modal-root'));
+    let settled = false;
+
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      modal.close();
+      resolve(true);
+    };
+
     modal.open(`
       <div class="modal-handle"></div>
       <h2 id="modal-title">${title}</h2>
       <p style="margin: 8px 0 24px;">${message}</p>
       <div class="form-actions">
-        <button class="btn btn--primary" onclick="this.closest('.modal-sheet').modalInstance.close(); resolve(true)">OK</button>
+        <button type="button" class="btn btn--primary" data-alert-ok>OK</button>
       </div>
     `);
 
-    modal.onClose(() => resolve(true));
+    modal.container.querySelector('[data-alert-ok]').addEventListener('click', finish);
+    modal.onClose(() => {
+      if (!settled) {
+        settled = true;
+        resolve(true);
+      }
+    });
   });
 }

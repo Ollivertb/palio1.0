@@ -23,6 +23,16 @@ export class FormModal {
     this.container = container;
     this.isOpen = false;
     this.currentConfig = null;
+    // Expose the instance on the root element so inline handlers and
+    // openFormModal() can reach it.
+    if (container) container.formModalInstance = this;
+  }
+
+  /**
+   * Open a record form by category (used by the FAB and cards).
+   */
+  openForm(category, recordId = null, prefill = null) {
+    openFormModal(category, recordId, prefill);
   }
 
   /**
@@ -239,28 +249,29 @@ export class FormModal {
 /**
  * Open form for specific category
  */
-export function openFormModal(category, recordId = null) {
-  const state = getState();
+export function openFormModal(category, recordId = null, prefill = null) {
   const record = recordId ? getRecordByCategory(category, recordId) : null;
   const isEdit = !!record;
+  // Values can come from an existing record or a prefill object.
+  const source = record || prefill || {};
 
   const configs = {
     manut: {
       title: isEdit ? 'Editar Manutenção' : 'Nova Manutenção',
       category: 'manut',
       fields: [
-        { name: 'date', label: 'Data', type: 'date', value: record?.date || getToday(), required: true },
-        { name: 'km', label: 'Km', type: 'number', value: record?.km || getCurrentKm(), required: true, placeholder: 'Ex.: 85.000' },
-        { name: 'tipo', label: 'Serviço', type: 'select', value: record?.tipo || 'Óleo e filtro', required: true, options: [
+        { name: 'date', label: 'Data', type: 'date', value: source.date || getToday(), required: true },
+        { name: 'km', label: 'Km', type: 'number', value: source.km || getCurrentKm(), required: true, placeholder: 'Ex.: 85.000' },
+        { name: 'tipo', label: 'Serviço', type: 'select', value: source.tipo || 'Óleo e filtro', required: true, options: [
           'Óleo e filtro', 'Correia dentada', 'Freios', 'Suspensão', 'Pneus',
           'Velas', 'Arrefecimento', 'Elétrica', 'Embreagem', 'Filtros',
           'Motor', 'Revisão', 'Funilaria', 'Outro'
         ]},
-        { name: 'peca', label: 'Peça / item', type: 'text', value: record?.peca || '', placeholder: 'Ex.: kit correia dentada' },
-        { name: 'desc', label: 'Detalhes', type: 'textarea', value: record?.desc || '', placeholder: 'Ex.: troca da correia e do tensor' },
-        { name: 'cost', label: 'Custo (R$)', type: 'decimal', value: record?.cost || '', placeholder: 'Ex.: 350,00' },
-        { name: 'ofi', label: 'Oficina / loja', type: 'text', value: record?.ofi || '', placeholder: 'Ex.: Oficina do João' },
-        { name: 'obs', label: 'Observações', type: 'textarea', value: record?.obs || '' }
+        { name: 'peca', label: 'Peça / item', type: 'text', value: source.peca || '', placeholder: 'Ex.: kit correia dentada' },
+        { name: 'desc', label: 'Detalhes', type: 'textarea', value: source.desc || '', placeholder: 'Ex.: troca da correia e do tensor' },
+        { name: 'cost', label: 'Custo (R$)', type: 'decimal', value: source.cost || '', placeholder: 'Ex.: 350,00' },
+        { name: 'ofi', label: 'Oficina / loja', type: 'text', value: source.ofi || '', placeholder: 'Ex.: Oficina do João' },
+        { name: 'obs', label: 'Observações', type: 'textarea', value: source.obs || '' }
       ],
       onSubmit: (data) => {
         if (isEdit) updateMaintenance(recordId, data);
@@ -274,13 +285,13 @@ export function openFormModal(category, recordId = null) {
       title: isEdit ? 'Editar Abastecimento' : 'Novo Abastecimento',
       category: 'abast',
       fields: [
-        { name: 'date', label: 'Data', type: 'date', value: record?.date || getToday(), required: true },
-        { name: 'km', label: 'Km', type: 'number', value: record?.km || getCurrentKm(), required: true, placeholder: 'Ex.: 86.200' },
-        { name: 'comb', label: 'Combustível', type: 'select', value: record?.comb || 'Etanol', required: true, options: ['Etanol', 'Gasolina', 'Misto'] },
-        { name: 'lit', label: 'Litros', type: 'decimal', value: record?.lit || '', required: true, placeholder: 'Ex.: 32,5' },
-        { name: 'cost', label: 'Valor total (R$)', type: 'decimal', value: record?.cost || '', required: true, placeholder: 'Ex.: 150,00' },
-        { name: 'full', label: 'Tanque cheio?', type: 'select', value: record?.full || 'Sim', required: true, options: ['Sim', 'Não'] },
-        { name: 'posto', label: 'Posto', type: 'text', value: record?.posto || '', placeholder: 'Ex.: Posto Ipiranga' }
+        { name: 'date', label: 'Data', type: 'date', value: source.date || getToday(), required: true },
+        { name: 'km', label: 'Km', type: 'number', value: source.km || getCurrentKm(), required: true, placeholder: 'Ex.: 86.200' },
+        { name: 'comb', label: 'Combustível', type: 'select', value: source.comb || 'Etanol', required: true, options: ['Etanol', 'Gasolina', 'Misto'] },
+        { name: 'lit', label: 'Litros', type: 'decimal', value: source.lit || '', required: true, placeholder: 'Ex.: 32,5' },
+        { name: 'cost', label: 'Valor total (R$)', type: 'decimal', value: source.cost || '', required: true, placeholder: 'Ex.: 150,00' },
+        { name: 'full', label: 'Tanque cheio?', type: 'select', value: source.full || 'Sim', required: true, options: ['Sim', 'Não'] },
+        { name: 'posto', label: 'Posto', type: 'text', value: source.posto || '', placeholder: 'Ex.: Posto Ipiranga' }
       ],
       onSubmit: (data) => {
         if (isEdit) updateFuel(recordId, data);
@@ -294,10 +305,10 @@ export function openFormModal(category, recordId = null) {
       title: isEdit ? 'Editar Lembrete' : 'Novo Lembrete',
       category: 'lemb',
       fields: [
-        { name: 'desc', label: 'Lembrete', type: 'text', value: record?.desc || '', required: true, placeholder: 'Ex.: Trocar óleo' },
-        { name: 'km', label: 'No km', type: 'number', value: record?.km || '', placeholder: 'Ex.: 90.000' },
-        { name: 'date', label: 'Ou até a data', type: 'date', value: record?.date || '', placeholder: 'Opcional' },
-        { name: 'obs', label: 'Observações', type: 'textarea', value: record?.obs || '' }
+        { name: 'desc', label: 'Lembrete', type: 'text', value: source.desc || '', required: true, placeholder: 'Ex.: Trocar óleo' },
+        { name: 'km', label: 'No km', type: 'number', value: source.km || '', placeholder: 'Ex.: 90.000' },
+        { name: 'date', label: 'Ou até a data', type: 'date', value: source.date || '', placeholder: 'Opcional' },
+        { name: 'obs', label: 'Observações', type: 'textarea', value: source.obs || '' }
       ],
       onSubmit: (data) => {
         if (isEdit) updateReminder(recordId, data);
@@ -311,10 +322,10 @@ export function openFormModal(category, recordId = null) {
       title: isEdit ? 'Editar Documento' : 'Novo Documento',
       category: 'doc',
       fields: [
-        { name: 'tipo', label: 'Documento', type: 'select', value: record?.tipo || 'IPVA', required: true, options: ['IPVA', 'Seguro', 'Licenciamento', 'Multa', 'Outro'] },
-        { name: 'date', label: 'Vencimento', type: 'date', value: record?.date || '', required: true },
-        { name: 'cost', label: 'Valor (R$)', type: 'decimal', value: record?.cost || '', placeholder: 'Ex.: 500,00' },
-        { name: 'obs', label: 'Observações', type: 'textarea', value: record?.obs || '' }
+        { name: 'tipo', label: 'Documento', type: 'select', value: source.tipo || 'IPVA', required: true, options: ['IPVA', 'Seguro', 'Licenciamento', 'Multa', 'Outro'] },
+        { name: 'date', label: 'Vencimento', type: 'date', value: source.date || '', required: true },
+        { name: 'cost', label: 'Valor (R$)', type: 'decimal', value: source.cost || '', placeholder: 'Ex.: 500,00' },
+        { name: 'obs', label: 'Observações', type: 'textarea', value: source.obs || '' }
       ],
       onSubmit: (data) => {
         if (isEdit) updateDocument(recordId, data);
@@ -328,9 +339,9 @@ export function openFormModal(category, recordId = null) {
       title: isEdit ? 'Editar Anotação' : 'Nova Anotação',
       category: 'nota',
       fields: [
-        { name: 'titulo', label: 'Título', type: 'text', value: record?.titulo || '', required: true, placeholder: 'Ex.: Calibragem dos pneus' },
-        { name: 'texto', label: 'Informação', type: 'textarea', value: record?.texto || '', required: true, placeholder: 'Ex.: 32 psi na frente, 30 atrás' },
-        { name: 'date', label: 'Data', type: 'date', value: record?.date || getToday(), required: true }
+        { name: 'titulo', label: 'Título', type: 'text', value: source.titulo || '', required: true, placeholder: 'Ex.: Calibragem dos pneus' },
+        { name: 'texto', label: 'Informação', type: 'textarea', value: source.texto || '', required: true, placeholder: 'Ex.: 32 psi na frente, 30 atrás' },
+        { name: 'date', label: 'Data', type: 'date', value: source.date || getToday(), required: true }
       ],
       onSubmit: (data) => {
         if (isEdit) updateNote(recordId, data);
@@ -371,7 +382,6 @@ function getCurrentKm() {
   );
 }
 
-// Export for global access
+// Export for global access (do not overwrite the live formModal instance)
 window.garagemApp = window.garagemApp || {};
 window.garagemApp.openFormModal = openFormModal;
-window.garagemApp.formModal = null; // Will be set after init

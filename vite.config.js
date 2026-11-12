@@ -1,7 +1,12 @@
 import { defineConfig } from 'vite';
 import { generateSW } from 'workbox-build';
 
+// GitHub Pages project sites are served from /<repo>/, so the deploy
+// workflow sets VITE_BASE=/palio1.0/. Local development keeps "/".
+const base = process.env.VITE_BASE || '/';
+
 export default defineConfig({
+  base,
   root: '.',
   publicDir: 'public',
   build: {
@@ -16,7 +21,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: false
   },
   plugins: [
     {
@@ -24,6 +29,9 @@ export default defineConfig({
       async closeBundle() {
         await generateSW({
           swDest: 'dist/sw.js',
+          globDirectory: 'dist',
+          globPatterns: ['**/*.{js,css,html,svg,webmanifest}'],
+          navigateFallback: 'index.html',
           clientsClaim: true,
           skipWaiting: true,
           runtimeCaching: [

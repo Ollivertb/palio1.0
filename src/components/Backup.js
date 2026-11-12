@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { getIcon } from '../utils/icons.js';
-import { escapeHtml } from '../utils/helpers.js';
+import { escapeHtml, formatNumber } from '../utils/helpers.js';
 import { getState } from '../store.js';
 import { exportState, importState, clearState, DEFAULT_STATE } from '../utils/storage.js';
 import { showToast } from '../utils/helpers.js';
@@ -131,3 +131,10 @@ function confirmWipe() {
     }
   }
 }
+
+/* ==========================================================================
+   Global handlers used by inline template attributes
+   ========================================================================== */
+window.exportBackup = exportBackup;
+window.importBackup = importBackup;
+window.confirmWipe = confirmWipe;

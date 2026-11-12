@@ -4,7 +4,7 @@
 
 import { loadState, saveState, clearState, DEFAULT_STATE } from './utils/storage.js';
 import { markDirty } from './utils/github-sync.js';
-import { generateId, getToday, parseNumberInput, parseDecimalInput, formatNumber } from './utils/helpers.js';
+import { generateId, getToday, parseNumberInput, parseDecimalInput, formatNumber, daysUntil } from './utils/helpers.js';
 import { calculateAverageConsumption, getConsumptionSeries, getMonthlyExpenses } from './utils/format.js';
 
 const listeners = new Set();
@@ -184,10 +184,31 @@ export function getReminder(id) {
 }
 
 export function getAllReminders() {
+  const currentKm = getCurrentKm();
+
+  const statusOf = (r) => {
+    let urgent = false;
+    let soon = false;
+
+    if (r.km) {
+      const diff = Number(r.km) - currentKm;
+      if (diff <= 0) urgent = true;
+      else if (diff <= 500) soon = true;
+    }
+
+    if (r.date) {
+      const days = daysUntil(r.date);
+      if (days !== null && days < 0) urgent = true;
+      else if (days !== null && days <= 30 && !urgent) soon = true;
+    }
+
+    return { urgent, soon };
+  };
+
   return [...getState().data.lemb].sort((a, b) => {
     // Sort by urgency: overdue first, then by date/km
-    const aStatus = getReminderStatus(a);
-    const bStatus = getReminderStatus(b);
+    const aStatus = statusOf(a);
+    const bStatus = statusOf(b);
     if (aStatus.urgent !== bStatus.urgent) return aStatus.urgent ? -1 : 1;
     if (aStatus.soon !== bStatus.soon) return aStatus.soon ? -1 : 1;
     return (b.date || '').localeCompare(a.date || '');
