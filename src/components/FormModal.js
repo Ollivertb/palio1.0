@@ -261,7 +261,7 @@ export function openFormModal(category, recordId = null, prefill = null) {
       category: 'manut',
       fields: [
         { name: 'date', label: 'Data', type: 'date', value: source.date || getToday(), required: true },
-        { name: 'km', label: 'Km', type: 'number', value: source.km || getCurrentKm(), required: true, placeholder: 'Ex.: 85.000' },
+        { name: 'km', label: 'Km', type: 'number', value: source.km != null ? source.km : getCurrentKm(), required: true, placeholder: 'Ex.: 85.000' },
         { name: 'tipo', label: 'Serviço', type: 'select', value: source.tipo || 'Óleo e filtro', required: true, options: [
           'Óleo e filtro', 'Correia dentada', 'Freios', 'Suspensão', 'Pneus',
           'Velas', 'Arrefecimento', 'Elétrica', 'Embreagem', 'Filtros',
@@ -286,7 +286,7 @@ export function openFormModal(category, recordId = null, prefill = null) {
       category: 'abast',
       fields: [
         { name: 'date', label: 'Data', type: 'date', value: source.date || getToday(), required: true },
-        { name: 'km', label: 'Km', type: 'number', value: source.km || getCurrentKm(), required: true, placeholder: 'Ex.: 86.200' },
+        { name: 'km', label: 'Km', type: 'number', value: source.km != null ? source.km : getCurrentKm(), required: true, placeholder: 'Ex.: 86.200' },
         { name: 'comb', label: 'Combustível', type: 'select', value: source.comb || 'Etanol', required: true, options: ['Etanol', 'Gasolina', 'Misto'] },
         { name: 'lit', label: 'Litros', type: 'decimal', value: source.lit || '', required: true, placeholder: 'Ex.: 32,5' },
         { name: 'cost', label: 'Valor total (R$)', type: 'decimal', value: source.cost || '', required: true, placeholder: 'Ex.: 150,00' },

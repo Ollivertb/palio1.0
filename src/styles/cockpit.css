@@ -473,8 +473,24 @@ body {
 }
 
 /* ==========================================================================
-   Gráfico de gastos (barras em HTML)
+   Barra de progresso de revisão
    ========================================================================== */
+
+.service-progress {
+  height: 5px;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin: 4px 0 2px;
+}
+
+.service-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+  transition: width 0.5s var(--ease-out);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
 
 .expense-chart {
   display: grid;

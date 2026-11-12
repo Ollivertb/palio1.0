@@ -114,6 +114,9 @@ export async function pullFromGitHub(force = false) {
 
       await import('./storage.js').then(m => m.saveState(merged));
 
+      // Update in-memory state so the UI reflects the merged data
+      await import('../store.js').then(m => m.reloadState());
+
       state.sha = result.sha;
       state.dirty = true;
       saveGitHubState(state);

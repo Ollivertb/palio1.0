@@ -241,8 +241,8 @@ export function mergeStates(local, remote) {
   // Merge intervals
   merged.intervals = { ...merged.intervals, ...(remote.iv || {}) };
 
-  // Take meta if set
-  if (remote.meta) merged.meta = remote.meta;
+  // Take meta (allow 0 to be a valid value)
+  if (typeof remote.meta === 'number') merged.meta = remote.meta;
 
   // Keep local chat history (don't sync chat)
   return merged;

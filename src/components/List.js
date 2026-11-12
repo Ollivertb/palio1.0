@@ -234,7 +234,7 @@ function renderListItem(category, item) {
   const status = getItemStatus(category, item);
 
   return `
-    <div class="item ${status.urgent ? 'card--bordered-late' : ''}" role="listitem" onclick="garagemApp.openFormModal('${category}', '${item.id}')">
+    <div class="item ${status.urgent ? 'card--bordered-late' : ''}" role="listitem" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="garagemApp.openFormModal('${category}', '${item.id}')">
       <div class="item__icon">${getIcon(getRecordIcon(category))}</div>
       <div class="item__content">
         <div class="item__title">${escapeHtml(getRecordTitle(category, item))}</div>

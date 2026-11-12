@@ -6,6 +6,7 @@ import { loadState, saveState, clearState, DEFAULT_STATE } from './utils/storage
 import { markDirty } from './utils/github-sync.js';
 import { generateId, getToday, parseNumberInput, parseDecimalInput, formatNumber, daysUntil } from './utils/helpers.js';
 import { calculateAverageConsumption, getConsumptionSeries, getMonthlyExpenses } from './utils/format.js';
+import { DEFAULT_INTERVALS } from './utils/intervals.js';
 
 const listeners = new Set();
 let state = null;
@@ -18,6 +19,14 @@ export function getState() {
     state = loadState();
   }
   return state;
+}
+
+/**
+ * Reload in-memory state from localStorage and notify listeners
+ */
+export function reloadState() {
+  state = loadState();
+  notify();
 }
 
 /**
@@ -282,17 +291,6 @@ export function getAllNotes() {
 /* ==========================================================================
    Intervals (Revisão)
    ========================================================================== */
-const DEFAULT_INTERVALS = {
-  'Óleo e filtro': [10000, 12],
-  'Correia dentada': [50000, 60],
-  'Freios': [30000, 24],
-  'Velas': [40000, 36],
-  'Filtros': [15000, 12],
-  'Arrefecimento': [40000, 24],
-  'Pneus': [40000, 48],
-  'Suspensão': [60000, 48],
-  'Embreagem': [80000, 0]
-};
 
 export function getInterval(service) {
   const s = getState();

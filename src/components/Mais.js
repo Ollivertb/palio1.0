@@ -32,7 +32,7 @@ export function renderMais(state, { navigate }) {
         if (item.countKey) {
           const count = data[item.countKey]?.length || 0;
           return `
-            <div class="item" onclick="garagemApp.navigate('${item.id}')">
+            <div class="item" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="garagemApp.navigate('${item.id}')">
               <div class="item__icon">${getIcon(item.icon)}</div>
               <div class="item__content">
                 <div class="item__title">${item.label}</div>
@@ -43,7 +43,7 @@ export function renderMais(state, { navigate }) {
           `;
         }
         return `
-          <div class="item" onclick="garagemApp.navigate('${item.id}')">
+          <div class="item" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="garagemApp.navigate('${item.id}')">
             <div class="item__icon">${getIcon(item.icon)}</div>
             <div class="item__content">
               <div class="item__title">${item.label}</div>

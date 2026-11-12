@@ -4,7 +4,7 @@
 
 import { getIcon } from '../utils/icons.js';
 import { escapeHtml, formatCurrency, formatNumber, dt, nf, mo, getToday, parseNumberInput, parseDecimalInput } from '../utils/helpers.js';
-import { getState, addChatMessage, updateChatAction, clearChat, getAllMaintenance, getAllFuel, getAllReminders, getAllDocuments, getCurrentKm } from '../store.js';
+import { getState, addChatMessage, updateChatAction, clearChat, getAllMaintenance, getAllFuel, getAllReminders, getAllDocuments, getCurrentKm, getUpcomingServices as getStoreUpcomingServices } from '../store.js';
 import { formatMaintenanceType, formatFuelType, formatDocType, calculateAverageConsumption } from '../utils/format.js';
 import { parseRelativeDate } from '../utils/date.js';
 
@@ -286,7 +286,7 @@ async function processWithAI(text) {
     lemb: getAllReminders().map(({ id, ...r }) => r),
     doc: getAllDocuments().map(({ id, ...r }) => r),
     ficha: state.ficha,
-    proximas: getUpcomingServices().map(p => ({ servico: p.service, km: p.nextKm, data: p.nextDate, situacao: p.statusText }))
+    proximas: getStoreUpcomingServices().map(p => ({ servico: p.service, km: p.nextKm, data: p.nextDate, situacao: p.statusText }))
   };
 
   const prompt = `Você é o assistente pessoal de um app de garagem do Fiat Palio 2010 ELX Flex. Hoje é ${getToday()}. Km atual: ${currentKm || 'desconhecido'}.
@@ -517,62 +517,6 @@ export function setChatInput(text) {
     input.style.height = Math.min(input.scrollHeight, 110) + 'px';
     input.focus();
   }
-}
-
-/**
- * Get upcoming services
- */
-function getUpcomingServices() {
-  const state = getState();
-  const currentKm = getCurrentKm();
-  const upcoming = [];
-
-  const intervals = {
-    'Óleo e filtro': [10000, 12],
-    'Correia dentada': [50000, 60],
-    'Freios': [30000, 24],
-    'Velas': [40000, 36],
-    'Filtros': [15000, 12],
-    'Arrefecimento': [40000, 24],
-    'Pneus': [40000, 48],
-    'Suspensão': [60000, 48],
-    'Embreagem': [80000, 0]
-  };
-
-  for (const [service, [intKm, intMonths]] of Object.entries(intervals)) {
-    if (!intKm && !intMonths) continue;
-
-    const last = getAllMaintenance()
-      .filter(x => x.tipo === service)
-      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (Number(b.km) || 0) - (Number(a.km) || 0))[0];
-
-    if (!last) continue;
-
-    let nextKm = intKm && last.km ? Number(last.km) + intKm : null;
-    let nextDate = intMonths && last.date ? addMonths(last.date, intMonths) : null;
-
-    if (!nextKm && !nextDate) continue;
-
-    let status = 'ok', statusText = '';
-
-    if (nextKm && currentKm >= nextKm) {
-      status = 'late';
-      statusText = `Vencido no km (${nf(currentKm - nextKm)} km atrasado)`;
-    } else if (nextKm && nextKm - currentKm <= 500) {
-      status = 'soon';
-      statusText = `Faltam ${nf(nextKm - currentKm)} km`;
-    }
-
-    if (nextDate) {
-      const days = daysUntil(nextDate);
-      if (days < 0) { status = 'late'; statusText = `Venceu há ${Math.abs(days)} dias`; }
-      else if (days <= 30 && status !== 'late') { status = 'soon'; statusText = `Em ${days} dias`; }
-    }
-
-    upcoming.push({ service, lastDate: last.date, lastKm: last.km, nextKm, nextDate, status, statusText });
-  }
-
-  return upcoming.sort((a, b) => ({ late: 0, soon: 1, ok: 2 })[a.status] - ({ late: 0, soon: 1, ok: 2 })[b.status]);
 }
 
 /**

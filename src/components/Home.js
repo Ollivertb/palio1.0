@@ -208,7 +208,7 @@ function renderAlertCard(alert) {
   const labels = { lemb: 'Lembrete', doc: 'Documento' };
 
   return `
-    <div class="item card--bordered ${status.urgent ? 'card--bordered-late' : ''}" onclick="garagemApp.openFormModal('${type}', '${record.id}')">
+    <div class="item card--bordered ${status.urgent ? 'card--bordered-late' : ''}" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="garagemApp.openFormModal('${type}', '${record.id}')">
       <div class="item__icon">${getIcon(icons[type])}</div>
       <div class="item__content">
         <div class="item__title">${escapeHtml(type === 'lemb' ? record.desc : record.tipo)}</div>
@@ -223,13 +223,18 @@ function renderAlertCard(alert) {
  * Render upcoming service card
  */
 function renderUpcomingCard(service, index) {
+  const currentKm = getCurrentKm();
+  const progress = (service.lastKm && service.nextKm && Number(service.nextKm) > Number(service.lastKm))
+    ? Math.min(100, Math.max(0, Math.round(((currentKm - Number(service.lastKm)) / (Number(service.nextKm) - Number(service.lastKm))) * 100)))
+    : null;
   return `
-    <div class="item" onclick="garagemApp.openFormModal('lemb', '', { desc: 'Revisar: ${service.service}', km: ${service.nextKm || ''}, date: '${service.nextDate || ''} })">
+    <div class="item" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="garagemApp.openFormModal('lemb', '', { desc: 'Revisar: ${service.service}', km: ${service.nextKm || ''}, date: '${service.nextDate || ''} })">
       <div class="item__icon">${getIcon('manut')}</div>
       <div class="item__content">
         <div class="item__title">${escapeHtml(service.service)}</div>
         <div class="item__meta text-muted">Última: ${dt(service.lastDate)}${service.lastKm ? ' · ' + nf(service.lastKm) + ' km' : ''}</div>
         <div class="item__meta text-muted">Prevista: ${[service.nextKm ? nf(service.nextKm) + ' km' : '', service.nextDate ? dt(service.nextDate) : ''].filter(Boolean).join(' ou ')}</div>
+        ${progress !== null ? `<div class="service-progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso até a próxima revisão"><div class="service-progress__fill" style="width:${progress}%"></div></div>` : ''}
         <span class="tag ${service.status === 'late' ? 'tag--late' : service.status === 'soon' ? 'tag--soon' : 'tag--ok'}">${service.statusText}</span>
       </div>
       <span class="text-muted">+ lembrete</span>
@@ -246,7 +251,7 @@ function renderActivityCard(record) {
   const labels = { manut: 'Manutenção', abast: 'Abastecimento', lemb: 'Lembrete', doc: 'Documento', nota: 'Anotação' };
 
   return `
-    <div class="item" onclick="garagemApp.openFormModal('${category}', '${r.id}')">
+    <div class="item" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" onclick="garagemApp.openFormModal('${category}', '${r.id}')">
       <div class="item__icon">${getIcon(icons[category])}</div>
       <div class="item__content">
         <div class="item__title">${renderRecordTitle(category, r)}</div>
