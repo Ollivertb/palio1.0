@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Layout Styles
+   ========================================================================== */
+
+/* Page Transitions */
+.page {
+  animation: page-in 0.2s ease;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Home Page Specific */
+.home__hero { margin-bottom: 16px; }
+
+.home__quick-actions { margin-bottom: 24px; }
+
+.home__alerts { margin-bottom: 16px; }
+
+.home__upcoming { margin-bottom: 16px; }
+
+.home__chart { margin-bottom: 24px; }
+
+.home__recent { margin-bottom: 16px; }
+
+/* List Page */
+.list__header { margin-bottom: 16px; }
+
+.list__stats { margin: -4px 2px 8px; }
+
+.list__search { margin-bottom: 12px; }
+
+.list__items { display: flex; flex-direction: column; gap: 8px; }
+
+/* Detail/Modal Forms */
+.form-field { margin-bottom: 16px; }
+
+.form-field--inline { display: flex; flex-direction: column; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.form-actions { display: flex; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+
+/* Ficha Page */
+.ficha__fields { display: flex; flex-direction: column; gap: 16px; }
+
+/* Backup Page */
+.backup__warning { margin-bottom: 16px; }
+
+.backup__actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* Intervals Page */
+.intervals__fields { display: flex; flex-direction: column; gap: 16px; }
+
+.interval__field { display: flex; flex-direction: column; gap: 8px; }
+
+.interval__field > b { margin-bottom: 4px; }
+
+/* Sync Page */
+.sync__info { margin-bottom: 24px; }
+
+.sync__form { display: flex; flex-direction: column; gap: 16px; }
+
+.sync__status { margin-top: 16px; padding: 12px; border-radius: var(--radius-sm); background: var(--color-card); border: 1px solid var(--color-border); }
+
+.sync__status--ok { border-color: var(--color-success); }
+.sync__status--error { border-color: var(--color-accent); }
+.sync__status--syncing { border-color: var(--color-warning); }
+
+/* Consumption Card */
+.consumption-card { margin-bottom: 16px; }
+
+.consumption-card__header { margin-bottom: 12px; }
+
+.consumption-card__chart { margin-bottom: 12px; }
+
+.consumption-card__stats { font-size: 0.8125rem; color: var(--color-muted); }
+
+.consumption-card__fuel-types { margin-top: 8px; font-size: 0.8125rem; color: var(--color-muted); }
+
+.consumption-card__meta { margin-top: 12px; }
+
+/* Chart Container */
+.chart-container { width: 100%; overflow: visible; }
+.chart-container svg { width: 100%; display: block; }
+
+/* Upcoming Service Card */
+.upcoming-card { margin-bottom: 8px; }
+
+.upcoming-card__last { color: var(--color-muted); font-size: 0.8125rem; margin-bottom: 4px; }
+.upcoming-card__next { color: var(--color-muted); font-size: 0.8125rem; margin-bottom: 4px; }
+.upcoming-card__action { color: var(--color-muted); font-size: 0.8125rem; }
+
+/* Offline Banner */
+.offline-banner {
+  position: fixed;
+  top: var(--safe-top);
+  left: 0;
+  right: 0;
+  background: var(--color-warning);
+  color: #000;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  z-index: calc(var(--z-header) + 1);
+  animation: slide-down 0.3s ease;
+  display: none;
+}
+
+.offline-banner.visible { display: block; }
+
+@keyframes slide-down {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+/* Install Prompt */
+.install-prompt {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(140px + var(--safe-bottom));
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 0 8px 24px #0004;
+  z-index: var(--z-toast);
+  animation: slide-up 0.3s ease;
+  display: none;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.install-prompt.visible { display: block; }
+
+.install-prompt__title { font-weight: 700; margin-bottom: 4px; }
+.install-prompt__text { color: var(--color-muted); font-size: 0.875rem; margin-bottom: 12px; }
+.install-prompt__actions { display: flex; gap: 8px; }
+
+@media (min-width: 900px) {
+  .install-prompt { left: auto; right: 240px; bottom: 100px; }
+}

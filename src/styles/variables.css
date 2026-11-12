@@ -1,0 +1,104 @@
+/* ==========================================================================
+   CSS Custom Properties (Design Tokens)
+   ========================================================================== */
+
+:root {
+  /* Colors - Light Theme */
+  --color-bg: #eceef0;
+  --color-card: #fff;
+  --color-text: #17191c;
+  --color-muted: #62666d;
+  --color-accent: #d9322a;
+  --color-accent-bg: #fbe6e4;
+  --color-border: #dcdfe3;
+  --color-success: #1d7a47;
+  --color-warning: #9a5b00;
+  --color-shadow: 0 1px 0 #0000000d;
+
+  /* Spacing */
+  --radius-lg: 14px;
+  --radius-sm: 9px;
+  --radius-pill: 99px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-size-base: 15px;
+  --line-height-base: 1.45;
+
+  /* Z-index */
+  --z-header: 8;
+  --z-nav: 5;
+  --z-fab: 6;
+  --z-modal-backdrop: 20;
+  --z-modal: 21;
+  --z-toast: 40;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+
+  /* Safe area insets */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Dark Theme */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #111214;
+    --color-card: #1a1c20;
+    --color-text: #eceef1;
+    --color-muted: #989ca4;
+    --color-accent: #ff5a4d;
+    --color-accent-bg: #33201f;
+    --color-border: #2a2d33;
+    --color-success: #4cc58a;
+    --color-warning: #f0b34a;
+    --color-shadow: none;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #111214;
+  --color-card: #1a1c20;
+  --color-text: #eceef1;
+  --color-muted: #989ca4;
+  --color-accent: #ff5a4d;
+  --color-accent-bg: #33201f;
+  --color-border: #2a2d33;
+  --color-success: #4cc58a;
+  --color-warning: #f0b34a;
+  --color-shadow: none;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+}
