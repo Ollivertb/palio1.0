@@ -177,11 +177,19 @@ function handleKeydown(e) {
 /**
  * Update theme based on preference
  */
+const THEME_KEY = 'garagem-theme';
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#0b0d10' : '#eef0f3');
+}
+
 function updateTheme() {
   const root = document.documentElement;
   if (!root.dataset.theme) {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    root.dataset.theme = prefersDark ? 'dark' : 'light';
+    applyTheme(prefersDark ? 'dark' : 'light');
   }
 }
 
@@ -192,7 +200,13 @@ export function toggleTheme() {
   const root = document.documentElement;
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const current = root.dataset.theme || (prefersDark ? 'dark' : 'light');
-  root.dataset.theme = current === 'dark' ? 'light' : 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch {
+    // localStorage indisponível (modo privado): mantém só na sessão
+  }
   renderHeader(getState());
 }
 
