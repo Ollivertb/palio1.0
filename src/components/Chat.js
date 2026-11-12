@@ -260,8 +260,8 @@ export async function sendChatMessage(text) {
     }
 
     // Add bot response with actions
-    const actions = (response.actions || []).map(normalizeAction).filter(Boolean);
-    addChatMessage('assistant', response.text || (actions.length ? 'Entendi. Confira e salve:' : 'Não entendi bem. Tente algo como: "Troquei a correia dentada dia 10/11 com 85.000 km".'), actions);
+    const actions = (response.actions || response.acoes || []).map(normalizeAction).filter(Boolean);
+    addChatMessage('assistant', response.text || response.resposta || (actions.length ? 'Entendi. Confira e salve:' : 'Não entendi bem. Tente algo como: "Troquei a correia dentada dia 10/11 com 85.000 km".'), actions);
 
   } catch (error) {
     console.error('Chat error:', error);
