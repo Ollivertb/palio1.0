@@ -3,7 +3,10 @@ import { generateSW } from 'workbox-build';
 
 export default defineConfig({
   root: '.',
-  base: './', // necessário para GitHub Pages (app roda em /nome-do-repo/)
+  base: './',
+  define: {
+    __BUILD_ID__: JSON.stringify(String(Date.now()))
+  }, // necessário para GitHub Pages (app roda em /nome-do-repo/)
   publicDir: 'public',
   build: {
     outDir: 'dist',

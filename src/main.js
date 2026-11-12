@@ -15,10 +15,21 @@ if (document.readyState === 'loading') {
 // Register Service Worker (production only, respects the deploy base path)
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+    const swUrl = `${import.meta.env.BASE_URL}sw.js?v=${__BUILD_ID__}`;
     navigator.serviceWorker.register(swUrl).catch(err => {
       console.log('SW registration failed:', err);
     });
+  });
+}
+
+// Recarrega automaticamente quando uma nova versao do SW assume o controle,
+// garantindo que o usuario veja a atualizacao sem precisar limpar cache.
+if ('serviceWorker' in navigator) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
   });
 }
 
