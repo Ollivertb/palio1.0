@@ -129,11 +129,12 @@
   border-radius: var(--radius-lg);
   padding: 16px;
   box-shadow: 0 8px 24px #0004;
-  z-index: var(--z-toast);
   animation: slide-up 0.3s ease;
   display: none;
   max-width: 400px;
   margin: 0 auto;
+  /* fica abaixo dos modais para não cobrir formulários */
+  z-index: calc(var(--z-modal-backdrop) - 1);
 }
 
 .install-prompt.visible { display: block; }

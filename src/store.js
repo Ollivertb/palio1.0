@@ -427,6 +427,8 @@ export function getUpcomingServices() {
       }
     }
 
+    if (!statusText) statusText = 'Em dia';
+
     upcoming.push({
       service,
       lastDate: last.date,

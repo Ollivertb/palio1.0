@@ -1,37 +1,64 @@
 /* ==========================================================================
    CSS Custom Properties (Design Tokens)
+   "Cockpit" theme: dark surfaces, racing-red accent, digital readouts.
    ========================================================================== */
 
 :root {
-  /* Colors - Light Theme */
-  --color-bg: #eceef0;
-  --color-card: #fff;
-  --color-text: #17191c;
-  --color-muted: #62666d;
-  --color-accent: #d9322a;
-  --color-accent-bg: #fbe6e4;
-  --color-border: #dcdfe3;
-  --color-success: #1d7a47;
-  --color-warning: #9a5b00;
-  --color-shadow: 0 1px 0 #0000000d;
+  /* ---- Surfaces & text (light theme) ---- */
+  --color-bg: #eef0f3;
+  --color-bg-deep: #e3e7ec;
+  --color-card: #ffffff;
+  --color-card-2: #f7f8fa;
+  --color-text: #12151a;
+  --color-muted: #5e6672;
+  --color-faint: #8a929e;
+  --color-border: #dde1e7;
+  --color-border-strong: #c4cad3;
 
-  /* Spacing */
-  --radius-lg: 14px;
-  --radius-sm: 9px;
-  --radius-pill: 99px;
+  --color-accent: #e0271c;
+  --color-accent-2: #ff6a3a;
+  --color-accent-bg: #fdeae8;
+  --color-success: #128152;
+  --color-warning: #9c6200;
+  --color-danger: #e0271c;
+
+  --color-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 10px 28px rgba(16, 24, 40, 0.07);
+  --color-shadow-soft: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  /* ---- Cockpit panel (stays dark in both themes) ---- */
+  --hero-bg: radial-gradient(130% 140% at 6% 0%, #3a171a 0%, #191d23 42%, #0c0e12 100%);
+  --hero-text: #f3f5f7;
+  --hero-muted: #96a0ab;
+  --hero-border: #2b323b;
+  --hero-grid: rgba(255, 255, 255, 0.045);
+  --hero-shadow: 0 20px 44px rgba(6, 8, 12, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* ---- Accent glow / rings ---- */
+  --glow-accent: 0 10px 28px rgba(224, 39, 28, 0.32);
+  --ring-accent: inset 0 0 0 1px rgba(224, 39, 28, 0.18);
+
+  /* ---- Spacing ---- */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
   --space-lg: 16px;
   --space-xl: 24px;
+  --space-2xl: 32px;
 
-  /* Typography */
+  /* ---- Radii ---- */
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 99px;
+
+  /* ---- Typography ---- */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --font-size-base: 15px;
   --line-height-base: 1.45;
+  --tracking-caps: 0.14em;
 
-  /* Z-index */
+  /* ---- Z-index ---- */
   --z-header: 8;
   --z-nav: 5;
   --z-fab: 6;
@@ -39,11 +66,12 @@
   --z-modal: 21;
   --z-toast: 40;
 
-  /* Transitions */
+  /* ---- Transitions ---- */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+  --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
 
-  /* Safe area insets */
+  /* ---- Safe area insets ---- */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -53,30 +81,58 @@
 /* Dark Theme */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-bg: #111214;
-    --color-card: #1a1c20;
-    --color-text: #eceef1;
-    --color-muted: #989ca4;
-    --color-accent: #ff5a4d;
-    --color-accent-bg: #33201f;
-    --color-border: #2a2d33;
-    --color-success: #4cc58a;
-    --color-warning: #f0b34a;
-    --color-shadow: none;
+    --color-bg: #0b0d10;
+    --color-bg-deep: #06080a;
+    --color-card: #14181d;
+    --color-card-2: #181d23;
+    --color-text: #eef1f4;
+    --color-muted: #8b939e;
+    --color-faint: #69717c;
+    --color-border: #232a32;
+    --color-border-strong: #333c46;
+
+    --color-accent: #ff4a3d;
+    --color-accent-2: #ff7a3d;
+    --color-accent-bg: rgba(255, 74, 61, 0.14);
+    --color-success: #3ddc91;
+    --color-warning: #ffb020;
+    --color-danger: #ff4a3d;
+
+    --color-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 14px 34px rgba(0, 0, 0, 0.4);
+    --color-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 22px rgba(0, 0, 0, 0.28);
+
+    --hero-bg: radial-gradient(130% 140% at 6% 0%, #45181c 0%, #1b2027 42%, #0b0e12 100%);
+    --hero-border: #2f3741;
+    --glow-accent: 0 10px 30px rgba(255, 74, 61, 0.35);
+    --ring-accent: inset 0 0 0 1px rgba(255, 74, 61, 0.22);
   }
 }
 
 :root[data-theme="dark"] {
-  --color-bg: #111214;
-  --color-card: #1a1c20;
-  --color-text: #eceef1;
-  --color-muted: #989ca4;
-  --color-accent: #ff5a4d;
-  --color-accent-bg: #33201f;
-  --color-border: #2a2d33;
-  --color-success: #4cc58a;
-  --color-warning: #f0b34a;
-  --color-shadow: none;
+  --color-bg: #0b0d10;
+  --color-bg-deep: #06080a;
+  --color-card: #14181d;
+  --color-card-2: #181d23;
+  --color-text: #eef1f4;
+  --color-muted: #8b939e;
+  --color-faint: #69717c;
+  --color-border: #232a32;
+  --color-border-strong: #333c46;
+
+  --color-accent: #ff4a3d;
+  --color-accent-2: #ff7a3d;
+  --color-accent-bg: rgba(255, 74, 61, 0.14);
+  --color-success: #3ddc91;
+  --color-warning: #ffb020;
+  --color-danger: #ff4a3d;
+
+  --color-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 14px 34px rgba(0, 0, 0, 0.4);
+  --color-shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 22px rgba(0, 0, 0, 0.28);
+
+  --hero-bg: radial-gradient(130% 140% at 6% 0%, #45181c 0%, #1b2027 42%, #0b0e12 100%);
+  --hero-border: #2f3741;
+  --glow-accent: 0 10px 30px rgba(255, 74, 61, 0.35);
+  --ring-accent: inset 0 0 0 1px rgba(255, 74, 61, 0.22);
 }
 
 /* Reduced Motion */

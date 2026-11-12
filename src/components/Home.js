@@ -24,8 +24,12 @@ export function renderHome(state, { navigate }) {
     <!-- Hero Section -->
     <section class="hero" aria-label="Resumo do veículo">
       <div class="hero__row">
-        <span class="hero__vehicle">${escapeHtml(state.nome)} · Fiat Palio 2010 ELX Flex</span>
-        ${state.ficha?.placa ? `<span class="hero__plate">${escapeHtml(state.ficha.placa)}</span>` : ''}
+        <span class="hero__status ${alerts.length ? 'hero__status--alert' : ''}">
+          <i></i>${alerts.length ? `${alerts.length} ${alerts.length === 1 ? 'alerta' : 'alertas'}` : 'Em dia'}
+        </span>
+        ${state.ficha?.placa
+          ? `<span class="hero__plate">${escapeHtml(state.ficha.placa)}</span>`
+          : '<span class="hero__model">2010 · ELX Flex</span>'}
       </div>
 
       <!-- Odometer -->
@@ -91,7 +95,13 @@ export function renderHome(state, { navigate }) {
     ` : `
     <section aria-label="Alertas">
       <h2>Atenção</h2>
-      <div class="card text-muted">Tudo em dia ✓ — sem lembretes ou vencimentos próximos.</div>
+      <div class="status-panel">
+        <span class="status-panel__icon">${getIcon('ok')}</span>
+        <div>
+          <b class="status-panel__title">Tudo em dia</b>
+          <span class="status-panel__text">Nenhum lembrete ou vencimento nos próximos 30 dias.</span>
+        </div>
+      </div>
     </section>
     `}
 
@@ -290,34 +300,29 @@ function renderExpensesChart() {
 
   const max = Math.max(...data.map(d => d.total), 1);
   const avg = data.reduce((s, d) => s + d.total, 0) / data.length;
-  const chartHeight = 64;
-  const chartBottom = 100;
-  const avgY = chartBottom - (avg / max) * chartHeight;
+  const hasData = data.some(d => d.total > 0);
 
   return `
-    <svg class="chart-container" viewBox="0 0 300 126" role="img" aria-label="Gastos mensais em reais">
-      <line x1="6" x2="294" y1="${chartBottom}" y2="${chartBottom}" stroke="var(--color-border)"/>
-      ${avg > 0 ? `<line x1="6" x2="294" y1="${avgY}" y2="${avgY}" stroke="var(--color-muted)" stroke-dasharray="3 4" opacity="0.6"/>` : ''}
+    <div class="expense-chart" role="img" aria-label="Gastos mensais em reais nos últimos 6 meses">
       ${data.map((d, i) => {
-        const h = (d.total / max) * chartHeight;
-        const x = i * 48 + 10;
         const isCurrent = i === data.length - 1;
-        const monthAbbr = getMonthAbbr(d.month);
+        const pct = hasData ? Math.round((d.total / max) * 100) : 0;
         return `
-          <rect x="${x}" y="${chartBottom - Math.max(h, 2)}" width="32" height="${Math.max(h, 2)}" rx="5"
-                fill="${isCurrent ? 'var(--color-accent)' : 'var(--color-muted)'}"
-                opacity="${isCurrent ? 1 : 0.35}">
-            <title>${monthAbbr}: ${formatCurrency(d.total)}</title>
-          </rect>
-          <text x="${x + 16}" y="116" text-anchor="middle" font-size="10"
-                font-weight="${isCurrent ? 700 : 400}"
-                fill="${isCurrent ? 'var(--color-accent)' : 'var(--color-muted)'}">${monthAbbr}</text>
-          ${d.total > 0 ? `<text x="${x + 16}" y="${chartBottom - h - 5}" text-anchor="middle" font-size="9.5"
-                font-weight="${isCurrent ? 700 : 500}" fill="var(--color-text)">${Math.round(d.total)}</text>` : ''}
+          <div class="expense-chart__col ${isCurrent ? 'expense-chart__col--current' : ''}" title="${getMonthAbbr(d.month)}: ${formatCurrency(d.total)}">
+            <span class="expense-chart__value">${d.total > 0 ? Math.round(d.total) : ''}</span>
+            <span class="expense-chart__track">
+              <span class="expense-chart__bar" style="height:${Math.max(pct, 3)}%"></span>
+            </span>
+            <span class="expense-chart__month">${getMonthAbbr(d.month)}</span>
+          </div>
         `;
       }).join('')}
-    </svg>
-    <div class="text-muted" style="margin-top: 8px;">Gasto por mês (R$), com o mês atual em destaque${avg > 0 ? ` · média de ${formatCurrency(avg)} por mês` : ''}</div>
+    </div>
+    <div class="expense-chart__caption">
+      ${hasData
+        ? `Gasto por mês (R$), com o mês atual em destaque · média de ${formatCurrency(avg)}`
+        : 'Sem gastos registrados nos últimos 6 meses.'}
+    </div>
   `;
 }
 
